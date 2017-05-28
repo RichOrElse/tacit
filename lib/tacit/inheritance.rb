@@ -2,12 +2,10 @@ module Tacit
   module Inheritance
     refine Module do
       alias_method :*,  def Combines(*from, &block)
-                          Module.new(&block).tap do |extending|
-                            if nebulous?
-                              extending.include(*from, *extentions)
-                            else
-                              extending.include(*from, self)
-                            end
+                          if nebulous?
+                            Module.new(&block).include(*from, *extentions)
+                          else
+                            Module.new(&block).include(*from, self)
                           end
                         end
 
@@ -45,10 +43,10 @@ module Tacit
 
     refine Class do
       alias_method :*,  def Combines(*from, &block)
-                          as_base_class.tap do |subclass|
-                            subclass.include(*from) unless from.empty?
-                            subclass.class_eval(&block) if block_given?
-                          end
+                          subclass = as_base_class
+                          subclass.include(*from) unless from.empty?
+                          subclass.class_eval(&block) if block_given?
+                          subclass
                         end
 
       alias_method :+,  def As(_ = nil)
